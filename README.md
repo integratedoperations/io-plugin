@@ -12,7 +12,7 @@ plugin (`io`).
 | `/io:fix-tests` | Triage failing ExUnit tests as regression / stale / flaky and drive each to the right resolution. |
 | `/io:find-customer` | Find and qualify evidence-backed first customers from public signals. |
 
-Remote: `git@github.com:integratedoperations/io-plugin.git` (private).
+Remote: <https://github.com/integratedoperations/io-plugin> (public).
 
 ## Install
 
