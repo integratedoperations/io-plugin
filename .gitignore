@@ -1,0 +1,2 @@
+# Run artifacts written by skills, not skill source.
+plugins/*/skills/*/outputs/

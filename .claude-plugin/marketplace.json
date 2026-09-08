@@ -1,0 +1,29 @@
+{
+  "name": "io-local",
+  "owner": {
+    "name": "Cort Fritz",
+    "email": "cort@rheli.co"
+  },
+  "metadata": {
+    "description": "Claude Code skills shared across the io workspace (augur, interrogator)",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "io",
+      "description": "io-workspace skills — first-customer discovery (find-customer) from public signals, failing-test triage (fix-tests), and new-session context handoff (new)",
+      "author": {
+        "name": "Cort Fritz"
+      },
+      "source": "./plugins/io",
+      "category": "workflow",
+      "tags": [
+        "augur",
+        "customer-discovery",
+        "prospecting",
+        "testing",
+        "handoff"
+      ]
+    }
+  ]
+}

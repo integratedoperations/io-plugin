@@ -1,0 +1,19 @@
+{
+  "name": "io",
+  "version": "0.1.0",
+  "description": "io-workspace skills for Augur — find evidence-backed first customers from public signals (/io:find-customer), triage failing Elixir tests as regression/stale/flaky (/io:fix-tests), and write the self-contained context file a fresh session starts from (/io:new)",
+  "keywords": [
+    "augur",
+    "customer-discovery",
+    "prospecting",
+    "testing",
+    "flaky-tests",
+    "exunit",
+    "handoff",
+    "context",
+    "session"
+  ],
+  "author": {
+    "name": "Cort Fritz"
+  }
+}
