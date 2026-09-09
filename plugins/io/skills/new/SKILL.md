@@ -1,8 +1,8 @@
 ---
 name: io:new
-description: Produce ONE self-contained context file that a fresh session can start from, and print the exact `/phx:work <path>` line to copy. Usually an existing /phx:plan (which points at its scratchpad); otherwise write the missing plan or a handoff file first, from verified repo state. Use when the user types /io:new or asks for a handoff, a context file for a new session, a "what do I paste into the next session", or how to continue this work elsewhere.
+description: Commit the current work (never push), then produce ONE self-contained context file that a fresh session can start from, and print the exact `/phx:work <path>` line to copy. Usually an existing /phx:plan (which points at its scratchpad); otherwise write the missing plan or a handoff file first, from verified repo state. Use when the user types /io:new or asks for a handoff, a context file for a new session, a "what do I paste into the next session", or how to continue this work elsewhere.
 argument-hint: "[slug | plan path | topic] [--handoff] [--new] [--repo <path>]"
-allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(git show:*), Bash(git stash list:*), Bash(git worktree list:*), Bash(ls:*), Bash(cat:*), Bash(head:*), Bash(tail:*), Bash(sed:*), Bash(grep:*), Bash(find:*), Bash(date:*)
+allowed-tools: Read, Write, Edit, Grep, Glob, AskUserQuestion, Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(git show:*), Bash(git stash list:*), Bash(git worktree list:*), Bash(git add:*), Bash(git commit:*), Bash(ls:*), Bash(cat:*), Bash(head:*), Bash(tail:*), Bash(sed:*), Bash(grep:*), Bash(find:*), Bash(date:*)
 ---
 
 # /io:new — write the file a new session starts from
@@ -35,8 +35,11 @@ Three cases, one of which applies:
    instructions belong in a handoff file.
 5. **Dead ends are the highest-value content.** What was tried and failed, and
    why, is what stops the next session burning a context window repeating it.
-6. **Never commit, stage, push, or deploy.** Report what is staged/unstaged/
-   committed/undeployed; leave the tree as found.
+6. **Commit, never push.** Committing the work is the point — an uncommitted
+   tree is not a handoff. Stage and commit as described in Step 2.5, then record
+   the sha in the file. **Never `git push`, never open a PR, never deploy, never
+   tag.** Pushing and deploying are the user's calls, not this skill's; the file
+   must state plainly that the commits are local and unpushed.
 7. **End with one copyable line** and nothing after it.
 
 ## Step 0 — Resolve target and repo
@@ -77,6 +80,29 @@ genuinely open (e.g. "extend plan `foo` vs. start a plan for this") or when a
 task's intent is ambiguous enough that a wrong guess costs the next session real
 work. Otherwise choose and say which you chose.
 
+## Step 2.5 — Commit the work
+
+Leaving work uncommitted forces the next session to reconstruct an unlabelled
+diff. Commit it here.
+
+1. Re-run `git status --porcelain=v1` immediately before staging — these repos
+   are edited by other sessions and the Step 1 snapshot is already stale.
+2. Stage only the paths that belong to this work: `git add -- <paths>`. Never
+   `git add -A`, never `git add .`.
+3. Verify the staged content, not the line counts: print
+   `git diff --cached -- <file>` for every staged file. A matching `--stat`
+   proves nothing.
+4. Commit with an explicit pathspec — `git commit -- <paths>` — because
+   `git commit` without one takes the whole index, including another session's
+   staged work.
+5. Message: plain statement of what changed and why, no attitude, no attribution
+   trailers unless the repo's own convention has them. **Never `--amend`** — a
+   follow-up commit instead, always.
+6. If nothing belongs to this work, say "nothing to commit" and move on. If the
+   tree holds changes you cannot attribute to this work, leave them alone and
+   list them in the file under state-of-the-tree.
+7. Do not push, tag, PR, or deploy. Stop at the commit.
+
 ## Step 3 — Write the file
 
 Every section below is required. Omit a section only by writing "none".
@@ -89,9 +115,12 @@ Every section below is required. Omit a section only by writing "none".
   and the concurrency rule the repo uses (re-check `git status` before staging,
   verify staged content with `git diff --cached <file>`, never amend, follow-up
   commits only).
-- **State of the tree.** HEAD sha + subject; commits belonging to this work with
-  pushed/deployed status; staged vs unstaged files; anything deliberately left
-  dirty and why.
+- **State of the tree.** HEAD sha + subject; the sha and subject of the commit
+  made in Step 2.5; for every commit belonging to this work, whether it is
+  **pushed** and whether it is **deployed** — three different states, and the
+  next session cannot infer them. Say explicitly that this skill pushed nothing,
+  so the next session knows the branch is ahead of the remote. List any files
+  left dirty and why.
 - **Read first.** An ordered list of paths, each with one line on *why* — plan,
   scratchpad, review, the canonical docs named in `CLAUDE.md` that govern this
   area. Order matters: it is the reading sequence.
@@ -123,7 +152,9 @@ Re-read the written file as if you had never seen this conversation. Check:
 - Every path resolves; every sha exists; every command is runnable as written.
 - No sentence depends on context that is not in the file.
 - There is at least one `- [ ]` task.
-- Nothing was committed, staged, or pushed by this skill.
+- The commit sha in the file matches `git log -1`, and the file says the commit
+  is local and unpushed.
+- Nothing was pushed, tagged, PR'd, or deployed.
 
 Fix what fails, then report in two or three lines what the file covers.
 
