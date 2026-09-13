@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "io",
-      "description": "io-workspace skills — first-customer discovery (find-customer) from public signals, failing-test triage (fix-tests), and new-session context handoff (new)",
+      "description": "io-workspace skills — first-customer discovery (find-customer) from public signals, failing-test triage (fix-tests), new-session context handoff (new), and isolated Augur dev worktree lifecycle (worktree)",
       "author": {
         "name": "Cort Fritz"
       },
@@ -22,7 +22,8 @@
         "customer-discovery",
         "prospecting",
         "testing",
-        "handoff"
+        "handoff",
+        "worktree"
       ]
     }
   ]
