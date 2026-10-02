@@ -17,21 +17,33 @@ Remote: <https://github.com/integratedoperations/io-plugin> (public).
 
 ## Install
 
-Registered as a directory-source marketplace, so a checkout is the install —
-clone it, then point Claude Code at the clone:
+Install from GitHub; the repo is public:
 
 ```
-git clone git@github.com:integratedoperations/io-plugin.git
-claude plugin marketplace add "$PWD/io-plugin"
+claude plugin marketplace add integratedoperations/io-plugin
 claude plugin install io@io-local
 ```
 
-Keep the source a local path rather than the GitHub repo: edits to a `SKILL.md`
-are then live in the next session with no `claude plugin update` step.
+Or declare it in `~/.claude/settings.json` so a machine picks it up on its own:
 
-`claude plugin marketplace list` shows where the marketplace currently points.
-Editing a `SKILL.md` here takes effect in the **next** session — skills are read
-at session start, and `claude --continue` re-reads them without losing history.
+```json
+"extraKnownMarketplaces": {
+  "io-local": {
+    "source": { "source": "github", "repo": "integratedoperations/io-plugin" },
+    "autoUpdate": true
+  }
+},
+"enabledPlugins": { "io@io-local": true }
+```
+
+`plugin.json` carries no `version`, so the installed version is the commit
+SHA and every pushed commit is an update. A change reaches a machine only
+after it is pushed and pulled: `claude plugin marketplace update io-local`
+(or auto-update), then `/reload-plugins` in a running session.
+
+`claude plugin marketplace list` shows where the marketplace points. To try
+an unpushed `SKILL.md` edit, point the marketplace at a local clone
+(`claude plugin marketplace add "$PWD/io-plugin"`) and switch back after.
 
 ## Layout
 
