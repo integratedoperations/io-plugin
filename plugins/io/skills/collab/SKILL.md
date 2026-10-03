@@ -2,7 +2,7 @@
 name: io:collab
 description: Check in with the private LLM session register (integratedoperations/sessions) — find or create this session's entry, read and send messages between sessions, record parent/child links between pieces of work. Use when the user types /io:collab, says "check messages" or "register this session", or when a repo's CLAUDE.md asks for a check-in at session start, decision points or gates. Argument `messages` runs the message check only.
 argument-hint: "[messages]"
-allowed-tools: Read(~/Developer/io/sessions/**), Write(~/Developer/io/sessions/**), Edit(~/Developer/io/sessions/**), Grep, Glob, Bash(gh auth status), Bash(gh repo clone integratedoperations/sessions ~/Developer/io/sessions), Bash(git -C ~/Developer/io/sessions remote get-url origin), Bash(git -C ~/Developer/io/sessions pull --rebase --autostash), Bash(git -C ~/Developer/io/sessions push), Bash(git -C ~/Developer/io/sessions status:*), Bash(git -C ~/Developer/io/sessions ls-files:*), Bash(git -C ~/Developer/io/sessions diff --name-only:*), Bash(git -C ~/Developer/io/sessions rev-parse:*), Bash(git -C ~/Developer/io/sessions add -- :*), Bash(git -C ~/Developer/io/sessions commit -m:*), Bash(git -C ~/Developer/io/sessions mv -- :*), Bash(cp ~/Developer/io/sessions/scripts/pre-push ~/Developer/io/sessions/.git/hooks/pre-push), Bash(echo $CLAUDE_CODE_SESSION_ID), Bash(date -u +%Y-%m-%dT%H:%M:%SZ), Bash(hostname -s)
+allowed-tools: Read(~/Developer/io/sessions/**), Write(~/Developer/io/sessions/**), Edit(~/Developer/io/sessions/**), Grep, Glob, Bash(gh auth status), Bash(gh repo clone integratedoperations/sessions ~/Developer/io/sessions), Bash(git -C ~/Developer/io/sessions remote get-url origin), Bash(git -C ~/Developer/io/sessions pull --rebase --autostash), Bash(git -C ~/Developer/io/sessions push), Bash(git -C ~/Developer/io/sessions status:*), Bash(git -C ~/Developer/io/sessions ls-files:*), Bash(git -C ~/Developer/io/sessions diff --name-only:*), Bash(git -C ~/Developer/io/sessions rev-parse:*), Bash(git -C ~/Developer/io/sessions add -- :*), Bash(git -C ~/Developer/io/sessions commit -m:*), Bash(git -C ~/Developer/io/sessions mv -- :*), Bash(cp ~/Developer/io/sessions/scripts/pre-push ~/Developer/io/sessions/.git/hooks/pre-push), Bash(mkdir -p ~/Developer/io/sessions/.git/collab), Bash(git -C ~/Developer/io/sessions rev-parse HEAD:scripts HEAD:mise.toml | tr '\n' ' ' > ~/Developer/io/sessions/.git/collab/validator.pin), Bash(echo $CLAUDE_CODE_SESSION_ID), Bash(date -u +%Y-%m-%dT%H:%M:%SZ), Bash(hostname -s)
 ---
 
 # /io:collab — check in with the session register
@@ -42,7 +42,8 @@ The shell's working directory resets between calls. Address the clone with
 `allowed-tools` above; translate the repo-relative commands in
 `INSTRUCTIONS.md` into them. Write entry and message files, and
 `.git/collab/*`, with the Write tool rather than `cp`, `mkdir` or shell
-redirection. Anything outside those forms asks the user, which is intended.
+redirection, except `validator.pin` (Step 3). Anything outside those forms
+asks the user, which is intended.
 
 - `~/Developer/io/sessions/.git` absent:
   `gh repo clone integratedoperations/sessions ~/Developer/io/sessions`.
@@ -63,11 +64,17 @@ never runs on this machine unreviewed.
 
   ```sh
   cp ~/Developer/io/sessions/scripts/pre-push ~/Developer/io/sessions/.git/hooks/pre-push
-  git -C ~/Developer/io/sessions rev-parse HEAD:scripts HEAD:mise.toml
+  mkdir -p ~/Developer/io/sessions/.git/collab
+  git -C ~/Developer/io/sessions rev-parse HEAD:scripts HEAD:mise.toml | tr '\n' ' ' > ~/Developer/io/sessions/.git/collab/validator.pin
   ```
 
-  Write the two ids from `rev-parse`, space-separated on one line, to
-  `~/Developer/io/sessions/.git/collab/validator.pin`.
+  Write the pin with this exact command, not the Write tool. The hook
+  compares the file byte for byte against the same pipeline, whose output
+  ends in a space; the Write tool drops that trailing space, and the hook
+  then refuses every push as a changed validator.
+- A pin exists with the same two ids `rev-parse` gives now, but the file
+  differs in whitespace (an install that used the Write tool): rewrite it
+  with the command above. The ids are unchanged, so this is not a re-pin.
 - A different, non-symlink hook is there and no pin exists: leave it and
   tell the user.
 - A pin exists but `rev-parse HEAD:scripts HEAD:mise.toml` now gives other
