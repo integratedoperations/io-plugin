@@ -9,7 +9,7 @@ plugin (`io`).
 | Command | Purpose |
 |---|---|
 | `/io:new` | Write the one self-contained context file a fresh session starts from, and print the `/phx:work <path>` line to copy. |
-| `/io:collab` | Check in with the private session register (`integratedoperations/sessions`): find or create this session's entry, read and send messages between sessions. |
+| `/io:collab` | Check in with the private session register (`integratedoperations/sessions`): find or create this session's entry, read and send messages between sessions, nest sub-sessions under their parent, track children's status and judge done, and move entries (`/io:collab move <id> under <parent-id>` or `move <id> top`). |
 | `/io:fix-tests` | Triage failing ExUnit tests as regression / stale / flaky and drive each to the right resolution. |
 | `/io:find-customer` | Find and qualify evidence-backed first customers from public signals. |
 
