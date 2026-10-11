@@ -37,7 +37,21 @@ ref=origin/main
 git -C "$repo" rev-parse -q --verify "$ref^{commit}" >/dev/null || exit 0
 
 safe() { tr -cd 'a-z0-9_./-'; }
-path=$(git -C "$repo" grep -l -F -e "$sid" "$ref" -- sessions/ 2>/dev/null | head -n1 | sed "s|^$ref:||" | safe)
+# A session id can sit in several entries' session_ids, e.g. a session that
+# wrote placeholder entries for others before they were staffed. The entry
+# this session works now is the one listing it newest (last); fall back to
+# the first match only when no entry does.
+newest() { sed -n '/^session_ids:/,/^[a-z_]*:/s/^[[:space:]]*-[[:space:]]*"\{0,1\}\([^"[:space:]]*\).*/\1/p' | tail -n1; }
+path=
+first=
+for m in $(git -C "$repo" grep -l -F -e "$sid" "$ref" -- sessions/ 2>/dev/null | sed "s|^$ref:||" | tr -cd 'a-z0-9_./\n-'); do
+  [ -n "$first" ] || first=$m
+  if [ "$(git -C "$repo" show "$ref:$m" 2>/dev/null | newest)" = "$sid" ]; then
+    path=$m
+    break
+  fi
+done
+path=${path:-$first}
 
 if [ -z "$path" ]; then
   # Unregistered. Speak only where it matters: a fork of a registered
